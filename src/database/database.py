@@ -36,7 +36,31 @@ class Database:
             print(f"Database error: {e}")
         except Exception as e:
             print(f"Exception in execute_query method: {e}")
+        finally:
+            if cursor:
+                cursor.close()
+            self.close()
 
+    def execute_read_query(self, query, params=None):
+        """ Execute a read query """
+        if not self.conn:
+            self.connect()
+        try:
+            cursor = self.conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            result = cursor.fetchall()
+            return result
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+        except Exception as e:
+            print(f"Exception in execute_read_query method: {e}")
+        finally:
+            cursor.close()
+            self.close()
+            
     def execute_sql_file(self, file_path):
         with open(file_path, 'r') as file:
             sql = file.read()

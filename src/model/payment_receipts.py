@@ -7,6 +7,7 @@ class PaymentReceipt:
     db = Database()
     
     def __init__(self, name: str, amount: float, date: datetime, account_sender: str, account_receiver: str, message: str):
+        self.id = None
         self.name = name
         self.amount = amount
         self.date = date
@@ -37,3 +38,18 @@ class PaymentReceipt:
         
         for payment in payment_list:
             payment.save()
+            
+    @staticmethod
+    def get_payment_receipts():
+        """ Get all the payment receipts from the database """
+        db = Database()
+        db.connect()
+        query = '''
+        SELECT * FROM Payments_Received
+        '''
+        result = db.execute_read_query(query)
+        db.close()
+        return result
+    
+
+print(PaymentReceipt.get_payment_receipts())
