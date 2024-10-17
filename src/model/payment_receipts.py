@@ -1,6 +1,11 @@
 import sqlite3
 
-class Receipt:
+def save_payments_to_database(payment_list : list):
+    """ Save the payments to the database """
+    for payment in payment_list:
+        payment.save()
+
+class PaymentReceipt:
     def __init__(self, name, amount, date, account_sender, account_receiver, message):
         self.name = name
         self.amount = amount

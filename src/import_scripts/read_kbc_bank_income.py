@@ -1,6 +1,6 @@
 import re
 from tools.pdf_reader import read_pdf
-from model.receipts import Receipt
+from model.payment_receipts import PaymentReceipt
 
 account_receiver = ''
 
@@ -56,7 +56,7 @@ def convert_to_payment(transaction):
         message = re.sub(r'(\nOverschrijving|\nTijdstip\n\d{2}\.\d{2} uur\nInstantoverschrijving).*$', '', message, flags=re.DOTALL).strip()
     
     # Create Receipt object
-    payment = Receipt(name, amount, date, account_number, account_receiver, message)
+    payment = PaymentReceipt(name, amount, date, account_number, account_receiver, message)
     
     return payment
     
@@ -65,11 +65,7 @@ def save_to_database(pages):
     """ Save the transactions to the database """
     get_global_account_receiver(pages)
     list = split_data(pages)
-    for transaction in list:
-        receipt = convert_to_payment(transaction)
-        print("transaction:", receipt)
-        # if receipt.name != "Opneming":
-        #     receipt.save()
+    PaymentReceipt.save_payments_to_database([convert_to_payment(transaction) for transaction in list])
             
 if __name__ == "__main__":
     file_path = 'kbc_dummy.pdf'
