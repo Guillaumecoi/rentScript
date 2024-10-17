@@ -1,11 +1,10 @@
-import sqlite3
+from database.database import Database
 
-def save_payments_to_database(payment_list : list):
-    """ Save the payments to the database """
-    for payment in payment_list:
-        payment.save()
 
 class PaymentReceipt:
+    """ Class to represent a payment receipt """
+    db = Database()
+    
     def __init__(self, name, amount, date, account_sender, account_receiver, message):
         self.name = name
         self.amount = amount
@@ -18,22 +17,22 @@ class PaymentReceipt:
         return f'{self.date} - {self.name} - {self.amount} - {self.account_sender} - {self.account_receiver} - {self.message}'
     
     def save(self):
-        try:
-            conn = sqlite3.connect('rent.db')
-            cursor = conn.cursor()
-            cursor.execute('''
-            INSERT INTO Payments (name, amount, payment_date, account_number, message)
-            VALUES (?, ?, ?, ?, ?)
-            ''', (self.name, self.amount, self.date, self.account_number, self.message))
-            conn.commit()
-        except sqlite3.IntegrityError as e:
-            print(f"IntegrityError: {e}")
-            print(f"Payment: {self}")
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
-            print(f"Payment: {self}")
-        except Exception as e:
-            print(f"Exception in save method: {e}")
-            print(f"Payment: {self}")
-        finally:
-            conn.close()
+        """ Save the payment to the database """
+        query = '''
+        INSERT INTO Payments_Received (name, amount, payment_date, account_sender, account_receiver, message)
+        VALUES (?, ?, ?, ?, ?, ?)
+        '''
+        params = (self.name, self.amount, self.date, self.account_sender, self.account_receiver, self.message)
+        self.db.connect()
+        self.db.execute_query(query, params)
+        self.db.close()
+        
+    @staticmethod
+    def save_payments_to_database(payment_list : list):
+        """ Save the payments to the database """
+        # MAke sure the table exists
+        db = Database()
+        db.create_tables()
+        
+        for payment in payment_list:
+            payment.save()

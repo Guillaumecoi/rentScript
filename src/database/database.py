@@ -1,4 +1,4 @@
-# src/database.py
+import os
 import sqlite3
 from config import DATABASE_NAME
 
@@ -30,27 +30,22 @@ class Database:
                 cursor.execute(query)
             self.conn.commit()
             return cursor
-        finally:
-            cursor.close()
-            self.close()
+        except sqlite3.IntegrityError as e:
+            print(f"IntegrityError: {e}")
+        except sqlite3.Error as e:
+            print(f"Database error: {e}")
+        except Exception as e:
+            print(f"Exception in execute_query method: {e}")
 
-    def create_table(self, create_table_sql):
-        self.execute_query(create_table_sql)
+    def execute_sql_file(self, file_path):
+        with open(file_path, 'r') as file:
+            sql = file.read()
+        self.execute_query(sql)
 
-# Example usage
-if __name__ == "__main__":
-    db = Database()
-    create_payments_table_sql = '''
-    CREATE TABLE IF NOT EXISTS Payments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        amount REAL NOT NULL,
-        payment_date TEXT NOT NULL,
-        account_sender TEXT,
-        account_receiver TEXT,
-        message TEXT,
-        unique(name, amount, payment_date, account_sender, account_receiver, message)
-    )
-    '''
-    db.create_table(create_payments_table_sql)
-    db.close()
+    def execute_sql_files(self, file_paths):
+        for file_path in file_paths:
+            self.execute_sql_file(file_path)
+            
+    def create_tables(self):
+        self.execute_sql_file('sql/create_payments_received_table.sql')
+        
