@@ -1,11 +1,12 @@
 from database.database import Database
+from datetime import datetime
 
 
 class PaymentReceipt:
     """ Class to represent a payment receipt """
     db = Database()
     
-    def __init__(self, name, amount, date, account_sender, account_receiver, message):
+    def __init__(self, name: str, amount: float, date: datetime, account_sender: str, account_receiver: str, message: str):
         self.name = name
         self.amount = amount
         self.date = date
@@ -14,7 +15,7 @@ class PaymentReceipt:
         self.message = message
         
     def __str__(self):
-        return f'{self.date} - {self.name} - {self.amount} - {self.account_sender} - {self.account_receiver} - {self.message}'
+        return f'{self.date.strftime("%d-%m-%Y")} - {self.name} - {self.amount} - {self.account_sender} - {self.account_receiver} - {self.message}'
     
     def save(self):
         """ Save the payment to the database """
@@ -22,7 +23,7 @@ class PaymentReceipt:
         INSERT INTO Payments_Received (name, amount, payment_date, account_sender, account_receiver, message)
         VALUES (?, ?, ?, ?, ?, ?)
         '''
-        params = (self.name, self.amount, self.date, self.account_sender, self.account_receiver, self.message)
+        params = (self.name, self.amount, self.date.strftime("%d-%m-%Y"), self.account_sender, self.account_receiver, self.message)
         self.db.connect()
         self.db.execute_query(query, params)
         self.db.close()
