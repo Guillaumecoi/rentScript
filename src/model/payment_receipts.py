@@ -6,8 +6,8 @@ class PaymentReceipt:
     """ Class to represent a payment receipt """
     db = Database()
     
-    def __init__(self, name: str, amount: float, date: datetime, account_sender: str, account_receiver: str, message: str):
-        self.id = None
+    def __init__(self, name: str, amount: float, date: datetime, account_sender: str, account_receiver: str, message: str, id = None):
+        self.id = id
         self.name = name
         self.amount = amount
         self.date = date
@@ -40,7 +40,7 @@ class PaymentReceipt:
             payment.save()
             
     @staticmethod
-    def get_payment_receipts():
+    def get_payment_receipts_raw():
         """ Get all the payment receipts from the database """
         db = Database()
         db.connect()
@@ -51,5 +51,15 @@ class PaymentReceipt:
         db.close()
         return result
     
-
-print(PaymentReceipt.get_payment_receipts())
+    @staticmethod
+    def get_payment_receipts():
+        """ Get all the payment receipts from the database """
+        return PaymentReceipt.convert_listof_tuples_to_listof_objects(PaymentReceipt.get_payment_receipts_raw())
+    
+    @staticmethod
+    def convert_listof_tuples_to_listof_objects(list_of_tuples):
+        """ Convert a list of tuples to a list of PaymentReceipt objects """
+        payment_list = []
+        for payment in list_of_tuples:
+            payment_list.append(PaymentReceipt(payment[1], payment[2], datetime.strptime(payment[3], '%d-%m-%Y'), payment[4], payment[5], payment[6], payment[0]))
+        return payment_list
