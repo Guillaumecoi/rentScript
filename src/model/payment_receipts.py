@@ -18,13 +18,36 @@ class PaymentReceipt:
     def __str__(self):
         return f'{self.date.strftime("%d-%m-%Y")} - {self.name} - {self.amount} - {self.account_sender} - {self.account_receiver} - {self.message}'
     
-    def save(self):
+    def insert(self):
         """ Save the payment to the database """
         query = '''
         INSERT INTO Payments_Received (name, amount, payment_date, account_sender, account_receiver, message)
         VALUES (?, ?, ?, ?, ?, ?)
         '''
         params = (self.name, self.amount, self.date.strftime("%d-%m-%Y"), self.account_sender, self.account_receiver, self.message)
+        self.db.connect()
+        self.db.execute_query(query, params)
+        self.db.close()
+        
+    def update(self):
+        """ Update the payment in the database """
+        query = '''
+        UPDATE Payments_Received
+        SET name = ?, amount = ?, payment_date = ?, account_sender = ?, account_receiver = ?, message = ?
+        WHERE id = ?
+        '''
+        params = (self.name, self.amount, self.date.strftime("%d-%m-%Y"), self.account_sender, self.account_receiver, self.message, self.id)
+        self.db.connect()
+        self.db.execute_query(query, params)
+        self.db.close()
+        
+    def delete(self):
+        """ Delete the payment from the database """
+        query = '''
+        DELETE FROM Payments_Received
+        WHERE id = ?
+        '''
+        params = (self.id,)
         self.db.connect()
         self.db.execute_query(query, params)
         self.db.close()
@@ -37,7 +60,7 @@ class PaymentReceipt:
         db.create_tables()
         
         for payment in payment_list:
-            payment.save()
+            payment.insert()
             
     @staticmethod
     def get_payment_receipts_raw():
